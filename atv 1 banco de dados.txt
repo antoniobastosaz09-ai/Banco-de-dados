@@ -1,0 +1,21 @@
+create table cursos (
+  id_cursos int primary key,
+  sala int primary key,
+  sala varchar(20),
+  carga_horario int
+);
+
+create table professor(
+  id_professor int primary key,
+  displina varchar(20),
+  email varchar(20) unique
+);
+
+create table administrar(
+  id_professor int,
+  id_cursos int,
+  primary key(id_professor,id_cursos),
+  foreign key id_professor references professor(id.professor),
+  foreign key id_cursos references cursos(id.cursos)     
+);
+

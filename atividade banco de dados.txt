@@ -1,0 +1,164 @@
+-- =============================================
+-- TABELAS PRINCIPAIS
+-- =============================================
+
+CREATE TABLE alunos (
+    id_aluno        SERIAL PRIMARY KEY,
+    nome_aluno      VARCHAR(150) NOT NULL,
+    cpf_aluno       VARCHAR(14) UNIQUE,          -- CPF como texto (melhor prática)
+    telefone        VARCHAR(20)
+);
+
+CREATE TABLE plataforma (
+    id_plataforma   SERIAL PRIMARY KEY,
+    email_aluno     VARCHAR(150) NOT NULL UNIQUE,
+    senha_usuario   VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE cursos (
+    id_curso        SERIAL PRIMARY KEY,
+    tipo_curso      VARCHAR(100) NOT NULL,
+    carga_horaria   INTEGER NOT NULL
+);
+
+CREATE TABLE turmas (
+    id_turma        SERIAL PRIMARY KEY,
+    nome_turma      VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE inscricoes (
+    id_inscricao    SERIAL PRIMARY KEY,
+    matricula       VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE pagamentos (
+    id_pagamento    SERIAL PRIMARY KEY,
+    debito          BOOLEAN DEFAULT FALSE,
+    credito         BOOLEAN DEFAULT FALSE,
+    boleto          BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE professores (
+    id_professor    SERIAL PRIMARY KEY,
+    nome_professor  VARCHAR(150) NOT NULL,
+    email_professor VARCHAR(150) NOT NULL UNIQUE
+);
+
+-- =============================================
+-- CATEGORIAS DE CURSOS (especializações)
+-- =============================================
+
+CREATE TABLE tecnologia (
+    id_tecnologia       SERIAL PRIMARY KEY,
+    nome                VARCHAR(150) NOT NULL,
+    carga_horaria       INTEGER,
+    descricao           TEXT,
+    nivel_dificuldade   INTEGER CHECK (nivel_dificuldade BETWEEN 1 AND 5)
+);
+
+CREATE TABLE administracao (
+    id_administracao    SERIAL PRIMARY KEY,
+    nome                VARCHAR(150) NOT NULL,
+    carga_horaria       INTEGER,
+    descricao           TEXT,
+    nivel_dificuldade   INTEGER CHECK (nivel_dificuldade BETWEEN 1 AND 5)
+);
+
+CREATE TABLE design (
+    id_design           SERIAL PRIMARY KEY,
+    nome                VARCHAR(150) NOT NULL,
+    carga_horaria       INTEGER,
+    descricao           TEXT,
+    nivel_dificuldade   INTEGER CHECK (nivel_dificuldade BETWEEN 1 AND 5)
+);
+
+CREATE TABLE marketing (
+    id_marketing        SERIAL PRIMARY KEY,
+    nome                VARCHAR(150) NOT NULL,
+    carga_horaria       INTEGER,
+    descricao           TEXT,
+    nivel_dificuldade   INTEGER CHECK (nivel_dificuldade BETWEEN 1 AND 5)
+);
+
+CREATE TABLE financas (
+    id_financas         SERIAL PRIMARY KEY,
+    nome                VARCHAR(150) NOT NULL,
+    carga_horaria       INTEGER,
+    descricao           TEXT,
+    nivel_dificuldade   INTEGER CHECK (nivel_dificuldade BETWEEN 1 AND 5)
+);
+
+-- =============================================
+-- TABELAS DE RELACIONAMENTO (N:N)
+-- =============================================
+
+-- Aluno se cadastra na plataforma
+CREATE TABLE cadastro (
+    id_plataforma   INTEGER NOT NULL,
+    id_aluno        INTEGER NOT NULL,
+    PRIMARY KEY (id_plataforma, id_aluno),
+    FOREIGN KEY (id_plataforma) REFERENCES plataforma(id_plataforma),
+    FOREIGN KEY (id_aluno)      REFERENCES alunos(id_aluno)
+);
+
+-- Inscrição do aluno em cursos (via plataforma)
+CREATE TABLE inscricao_curso (
+    id_plataforma   INTEGER NOT NULL,
+    id_curso        INTEGER NOT NULL,
+    PRIMARY KEY (id_plataforma, id_curso),
+    FOREIGN KEY (id_plataforma) REFERENCES plataforma(id_plataforma),
+    FOREIGN KEY (id_curso)      REFERENCES cursos(id_curso)
+);
+
+-- Aulas (curso + turma)
+CREATE TABLE aulas (
+    id_curso        INTEGER NOT NULL,
+    id_turma        INTEGER NOT NULL,
+    PRIMARY KEY (id_curso, id_turma),
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso),
+    FOREIGN KEY (id_turma) REFERENCES turmas(id_turma)
+);
+
+-- Gerenciamento de inscrições
+CREATE TABLE gerenciamento_inscricao (
+    id_plataforma   INTEGER NOT NULL,
+    id_inscricao    INTEGER NOT NULL,
+    PRIMARY KEY (id_plataforma, id_inscricao),
+    FOREIGN KEY (id_plataforma) REFERENCES plataforma(id_plataforma),
+    FOREIGN KEY (id_inscricao)  REFERENCES inscricoes(id_inscricao)
+);
+
+-- Gerenciamento de pagamentos
+CREATE TABLE gerenciamento_pagamento (
+    id_plataforma   INTEGER NOT NULL,
+    id_pagamento    INTEGER NOT NULL,
+    PRIMARY KEY (id_plataforma, id_pagamento),
+    FOREIGN KEY (id_plataforma) REFERENCES plataforma(id_plataforma),
+    FOREIGN KEY (id_pagamento)  REFERENCES pagamentos(id_pagamento)
+);
+
+-- Opções de categoria do curso
+CREATE TABLE opcoes_curso (
+    id_curso            INTEGER NOT NULL,
+    id_tecnologia       INTEGER,
+    id_design           INTEGER,
+    id_financas         INTEGER,
+    id_administracao    INTEGER,
+    id_marketing        INTEGER,
+    PRIMARY KEY (id_curso),
+    FOREIGN KEY (id_curso)          REFERENCES cursos(id_curso),
+    FOREIGN KEY (id_tecnologia)     REFERENCES tecnologia(id_tecnologia),
+    FOREIGN KEY (id_design)         REFERENCES design(id_design),
+    FOREIGN KEY (id_financas)       REFERENCES financas(id_financas),
+    FOREIGN KEY (id_administracao)  REFERENCES administracao(id_administracao),
+    FOREIGN KEY (id_marketing)      REFERENCES marketing(id_marketing)
+);
+
+-- Professores nas turmas
+CREATE TABLE educacao (
+    id_turma        INTEGER NOT NULL,
+    id_professor    INTEGER NOT NULL,
+    PRIMARY KEY (id_turma, id_professor),
+    FOREIGN KEY (id_turma)      REFERENCES turmas(id_turma),
+    FOREIGN KEY (id_professor)  REFERENCES professores(id_professor)
+);
